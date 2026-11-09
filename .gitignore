@@ -1,0 +1,26 @@
+# Variables de entorno (contienen credenciales)
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Docker (los estudiantes generarán estos archivos)
+# No ignorar Dockerfile ni docker-compose.yml aquí,
+# ya que son parte de la entrega.
+
+# Solución de la evaluación (solo docente)
+solucion/.env
+solucion/.dockerignore
+solucion/docker-compose.yml
+solucion/backend/Dockerfile
+solucion/frontend/Dockerfile

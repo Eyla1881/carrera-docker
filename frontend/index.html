@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clínica Veterinaria</title>
+  <style>
+    /* Estilos básicos */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background: #f5f5f5;
+      color: #333;
+    }
+    h1 { text-align: center; margin-bottom: 0.5rem; color: #2c3e50; }
+    #config-msg {
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 1.5rem;
+      color: #555;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .card h2 { margin-bottom: 1rem; color: #2c3e50; }
+    label { display: block; margin-bottom: 0.3rem; font-weight: bold; }
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background: #3498db;
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button:hover { background: #2980b9; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      text-align: left;
+      padding: 0.6rem;
+      border-bottom: 1px solid #eee;
+    }
+    th { background: #ecf0f1; }
+    .error {
+      color: #e74c3c;
+      background: #fdecea;
+      padding: 0.8rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🐾 Clínica Veterinaria</h1>
+  <p id="config-msg">Cargando configuración...</p>
+
+  <!-- Mensaje de error global -->
+  <div id="error" class="error"></div>
+
+  <!-- Formulario para agregar mascota -->
+  <div class="card">
+    <h2>Registrar mascota</h2>
+    <form id="form-mascota">
+      <label for="nombre">Nombre</label>
+      <input type="text" id="nombre" placeholder="Ej: Firulais" required />
+
+      <label for="especie">Especie</label>
+      <input type="text" id="especie" placeholder="Ej: perro" required />
+
+      <button type="submit">Guardar</button>
+    </form>
+  </div>
+
+  <!-- Lista de mascotas -->
+  <div class="card">
+    <h2>Mascotas registradas</h2>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Nombre</th><th>Especie</th></tr>
+      </thead>
+      <tbody id="lista-mascotas">
+        <tr><td colspan="3">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+<script>
+  // ─── URL de la API (modificar si cambia el host/puerto) ───
+  const API = "http://localhost:8000";
+
+  // ─── Utilidades ───────────────────────────────────────────
+
+  /** Muestra un mensaje de error visible al usuario. */
+  function mostrarError(mensaje) {
+    const el = document.getElementById("error");
+    el.textContent = mensaje;
+    el.style.display = "block";
+  }
+
+  /** Oculta el mensaje de error. */
+  function ocultarError() {
+    document.getElementById("error").style.display = "none";
+  }
+
+  // ─── Cargar configuración (/config) ───────────────────────
+
+  async function cargarConfig() {
+    try {
+      const res = await fetch(API + "/config");
+      if (!res.ok) throw new Error("Respuesta " + res.status);
+      const data = await res.json();
+      document.getElementById("config-msg").textContent = data.message || "";
+    } catch (err) {
+      document.getElementById("config-msg").textContent = "No se pudo cargar la configuración.";
+      mostrarError("Error al conectar con la API: " + err.message);
+    }
+  }
+
+  // ─── Listar mascotas (GET /mascotas) ──────────────────────
+
+  async function cargarMascotas() {
+    const tbody = document.getElementById("lista-mascotas");
+    try {
+      const res = await fetch(API + "/mascotas");
+      if (!res.ok) throw new Error("Respuesta " + res.status);
+      const mascotas = await res.json();
+
+      if (mascotas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3">No hay mascotas registradas.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = mascotas
+        .map(function (m) {
+          return "<tr><td>" + m.id + "</td><td>" + m.nombre + "</td><td>" + m.especie + "</td></tr>";
+        })
+        .join("");
+    } catch (err) {
+      tbody.innerHTML = '<tr><td colspan="3">Error al cargar mascotas.</td></tr>';
+      mostrarError("No se pudo conectar con la API: " + err.message);
+    }
+  }
+
+  // ─── Crear mascota (POST /mascotas) ───────────────────────
+
+  document.getElementById("form-mascota").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    ocultarError();
+
+    const nombre = document.getElementById("nombre").value.trim();
+    const especie = document.getElementById("especie").value.trim();
+
+    if (!nombre || !especie) {
+      mostrarError("Ambos campos son obligatorios.");
+      return;
+    }
+
+    try {
+      const res = await fetch(API + "/mascotas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: nombre, especie: especie }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        mostrarError(err.detail || "Error al crear la mascota.");
+        return;
+      }
+
+      // Limpiar formulario y refrescar lista
+      document.getElementById("nombre").value = "";
+      document.getElementById("especie").value = "";
+      await cargarMascotas();
+    } catch (err) {
+      mostrarError("No se pudo conectar con la API: " + err.message);
+    }
+  });
+
+  // ─── Inicio ───────────────────────────────────────────────
+  cargarConfig();
+  cargarMascotas();
+</script>
+
+</body>
+</html>
+
