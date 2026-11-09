@@ -4,6 +4,15 @@
 
 Demostrar que puedes **contenerizar una aplicación de tres capas** (frontend, backend y base de datos) utilizando Docker y Docker Compose.
 
+## 🏁 Dinámica de la carrera
+
+Evaluación **presencial e individual**. Cada estudiante compite por levantar la aplicación desde cero:
+
+1. Crea tus archivos de Docker y levanta la aplicación con `docker compose up --build`.
+2. Cuando `verificar.sh` pasa todas las pruebas, avisa al docente para registrar tu orden de llegada.
+3. **Validación cruzada:** entrega al docente la carpeta completa del proyecto, incluido tu `.env` (por ejemplo, en un `.zip`). El docente la ejecutará después **en su propia máquina**, sin modificar nada.
+4. Si no funciona en la máquina del docente, recibes la **penalización** indicada en los criterios de evaluación.
+
 Se te entrega una aplicación funcional compuesta por:
 
 | Capa | Tecnología | Puerto |
@@ -164,14 +173,17 @@ El script comprueba automáticamente:
 
 | Criterio | Puntos |
 |----------|:------:|
-| `backend/Dockerfile` correcto | 20 |
-| `frontend/Dockerfile` correcto | 15 |
-| `docker-compose.yml` con los 3 servicios | 30 |
-| `.env` con valores correctos | 10 |
-| `.dockerignore` apropiado | 5 |
-| `docker compose up --build` levanta sin errores | 10 |
-| `verificar.sh` pasa todas las pruebas | 10 |
-| **Total** | **100** |
+| `backend/Dockerfile` correcto | 3 |
+| `frontend/Dockerfile` correcto | 2 |
+| `docker-compose.yml` con los 3 servicios | 5 |
+| Configuración con variables de entorno (`.env` correcto) | 2 |
+| `.dockerignore` apropiado | 1 |
+| `docker compose up --build` levanta y `verificar.sh` pasa todas las pruebas | 3 |
+| Validación cruzada: funciona en la máquina del docente | 2 |
+| Orden de llegada: 1.º = 2 · 2.º = 1,5 · 3.º = 1 · resto = 0,5 | 2 |
+| **Total** | **20** |
+
+**Penalización:** si la aplicación no funciona en la máquina del docente, se obtienen 0 puntos en validación cruzada y se restan 2 puntos adicionales.
 
 ---
 
